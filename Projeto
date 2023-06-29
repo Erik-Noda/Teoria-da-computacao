@@ -1,0 +1,267 @@
+#AFN--------------------------------------------------------------------------------------------
+class AFND:
+    def __init__(self,alfabeto,estados,estado_inicial,estados_finais,transicoes):
+        self.alfabeto= alfabeto
+        self.estados= estados
+        self.estado_inicial= estado_inicial
+        self.estados_finais= estados_finais
+        self.transicoes= transicoes
+
+class AFD:
+    def __init__(self,alfabeto,estados,estado_inicial,estados_finais,transicoes):
+        self.alfabeto= alfabeto
+        self.estados= estados
+        self.estado_inicial= estado_inicial
+        self.estados_finais= estados_finais
+        self.transicoes= transicoes
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+def ler_afnd(entrada): 
+    aux_alfabeto = entrada.readline()
+    alfabeto = aux_alfabeto.split(" ")
+
+    aux_estados = entrada.readline()# apenas para o print
+    estados=aux_estados.split(" ")
+    estado_inicial=entrada.readline()
+    aux_estados_finais = entrada.readline()
+    estados_finais=aux_estados_finais.split(" ")
+    transicoes=entrada.readlines()
+    quantidade_transicoes =len(transicoes)
+    
+    afnd = AFND(alfabeto,estados,estado_inicial,estados_finais,transicoes)
+
+#--------------------------------------------------------------------------------------------
+    
+    print('------------------------------------------------------')
+    print("AFND: ({", end='')
+    print(aux_alfabeto.rstrip(), end = '}, {')
+    print(aux_estados.rstrip(), end = '}, ' )
+    print("transicoes,", end = ' ')
+    print(estado_inicial.rstrip(),end= ', {')
+    print(aux_estados_finais.rstrip(),end = '})')
+    print("\nTransicoes = ")
+    for i in range(quantidade_transicoes):
+        print(transicoes[i], end = '')
+    print('------------------------------------------------------')
+    
+    return(afnd)
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+
+def conversao(afnd,temp):
+    estados_iniciais = []
+    simbolo_lido = []
+    estados_finais=[]
+    contador_espacos =0
+
+    for i in range(len(afnd.transicoes)):
+
+        for elemento in afnd.transicoes[i]:
+            if elemento == ' ':
+                contador_espacos+=1
+        
+        if contador_espacos == 3:
+            ei,sl,ef1,ef2 = afnd.transicoes[i].split(" ")
+            estados_iniciais.append(ei)
+            simbolo_lido.append(sl)
+            ef = ef1 + ef2
+            estados_finais.append(ef)
+            contador_espacos = 0
+
+        elif contador_espacos == 2:
+            ei,sl,ef = afnd.transicoes[i].split(" ")
+            estados_iniciais.append(ei)
+            simbolo_lido.append(sl)
+            estados_finais.append(ef)
+            contador_espacos = 0
+        
+        elif contador_espacos == 4:
+            ei,sl,ef1,ef2,ef3 = afnd.transicoes[i].split(" ")
+            estados_iniciais.append(ei)
+            simbolo_lido.append(sl)
+            ef = ef1 + ef2 + ef3
+            estados_finais.append(ef)
+            contador_espacos = 0
+    
+    
+    
+
+
+  #-------------------------------------------------------------------
+    novos_estados =[]
+    tamanho = len(novos_estados)
+    indice = 1
+
+    novos_estados.append(afnd.estado_inicial.strip())
+    aux = ""
+
+    temp.write("estado ")
+    for i in range(len(afnd.alfabeto)):
+        temp.write("| %s " %afnd.alfabeto[i].strip())
+
+    temp.write("\n%s "%afnd.estado_inicial.strip())
+    for i in range(len(afnd.transicoes)):
+        if estados_iniciais[i].strip()==afnd.estado_inicial.strip():
+            temp.write("| %s " %estados_finais[i].strip())
+            if estados_finais[i].strip() not in novos_estados:
+               novos_estados.append(estados_finais[i].strip())
+
+
+    while(len(novos_estados)>tamanho):
+        tamanho=len(novos_estados)
+        temp.write("\n%s"%novos_estados[indice])
+        for j in range (len(afnd.alfabeto)):
+            for i in range(len(afnd.transicoes)):
+                if estados_iniciais[i] in novos_estados[indice] and simbolo_lido[i].strip()==afnd.alfabeto[j].strip() and estados_finais[i].strip() != "[]":
+                   aux = aux.strip() + estados_finais[i].strip()
+
+            temp.write("| %s "%aux.strip())
+            if aux not in novos_estados:
+                novos_estados.append(aux)
+            aux = ""
+        indice +=1
+
+    return(temp)
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+
+def constroi_afd(temp,afnd,saida):
+    quantidade=0
+    estados = []
+    estados_finais=[]
+
+    for i in range(len(afnd.alfabeto)):
+        saida.write("%s " % afnd.alfabeto[i].strip())
+    saida.write("\n")
+
+    temp.readline()
+    for linha in temp:
+        quantidade +=1
+        reg1, reg2,reg3 = linha.split("|")
+        estados.append(reg1)
+        aux= reg1
+            
+    #--------------------------------------------------------
+
+
+    for i in range(len(estados)):
+        saida.write("P%d " %i)
+        
+    saida.write("\n")
+    saida.write("P0\n")
+    
+    for i in range(len(afnd.estados_finais)):
+        for j in range(len(estados)):
+            if afnd.estados_finais[i].strip() in estados[j].strip():
+                aux = "P%d"%j
+                if aux not in estados_finais:
+                    estados_finais.append(aux)
+    
+
+    for i in range(len(estados_finais)):
+        saida.write(estados_finais[i]+" ")
+    saida.write("\n")
+
+
+    #--------------------------------------------------------
+    temp.close()
+    temp = open("temp.txt","r")
+    temp.readline()
+    for i in range(quantidade):
+        reg4,reg5,reg6=temp.readline().split("|")
+
+        for j in range(len(estados)):
+            if estados[j].strip()==reg5.strip():
+                saida.write("P%d "%i)
+                saida.write("%s " %afnd.alfabeto[0].strip())
+                saida.write("P%d\n"%j)
+            if estados[j].strip()==reg6.strip():
+                saida.write("P%d "%i)
+                saida.write("%s " %afnd.alfabeto[1].strip())
+                saida.write("P%d \n"%j)
+
+
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+def ler_afd(saida):
+    aux_alfabeto = saida.readline()
+    alfabeto = aux_alfabeto.split(" ")
+
+    aux_estados = saida.readline()# apenas para o print
+    estados=aux_estados.rstrip().split(" ")
+    estado_inicial=saida.readline()
+    aux_estados_finais = saida.readline()
+    estados_finais=aux_estados_finais.split(" ")
+    transicoes=saida.readlines()
+    quantidade_transicoes =len(transicoes)
+    
+    afd = AFD(alfabeto,estados,estado_inicial,estados_finais,transicoes)
+#--------------------------------------------------------------------------------------------
+    
+    print('------------------------------------------------------')
+    print("AFD: ({", end='')
+    print(aux_alfabeto.rstrip(), end = '}, {')
+    print(aux_estados.rstrip(), end = '}, ' )
+    print("transicoes,", end = ' ')
+    print(estado_inicial.rstrip(),end= ', {')
+    print(aux_estados_finais.rstrip(),end = '})')
+    print("\nTransicoes = ")
+    for i in range(quantidade_transicoes):
+        print(transicoes[i], end = '')
+    print('------------------------------------------------------')
+    
+    return afd
+
+def minimizar_afd(afd,saida2):
+    estado_inicial=[]
+    simbolo_lido = []
+    estado_final = []
+    simbolo_lidoEestado_final= []
+    
+    for i in range(len(afd.transicoes)):
+        ei,sl,ef = afd.transicoes[i].rstrip().split(" ")
+        estado_inicial.append(ei)
+        simbolo_lido.append(sl)
+        estado_final.append(ef)
+
+    aux = ""
+    vetor_aux=[]
+
+    for j in range(len(afd.estados)):
+        for i in range(len(afd.transicoes)):
+            if "P%d"%j in estado_inicial[i]:
+                aux = aux + estado_final[i]
+        vetor_aux.append(aux)
+        aux = ""   
+   
+    print(vetor_aux)            
+
+
+
+
+
+
+#main
+entrada = open("AFND.txt","r")
+temp = open("temp.txt","w")
+saida = open("AFD.txt","w")
+saida2 = open("AFD_minimizado","w")
+
+afnd = ler_afnd(entrada)
+
+conversao(afnd,temp)
+temp.close()
+
+
+temp = open("temp.txt","r")
+constroi_afd(temp,afnd,saida)  
+saida.close()
+
+saida = open("AFD.txt","r")
+afd=ler_afd(saida)
+
+#minimizar_afd(afd,saida2)
+
+entrada.close()
+temp.close() 
+saida.close()
