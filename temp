@@ -1,0 +1,4 @@
+estado | a | b 
+q0 | q0q1 | q0q1 
+q0q1| q0q1 | q0q1qf 
+q0q1qf| q0q1 | q0q1qf 
