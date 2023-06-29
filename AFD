@@ -1,0 +1,10 @@
+a b 
+P0 P1 P2 
+P0
+P2 
+P0 a P1
+P0 b P1 
+P1 a P1
+P1 b P2 
+P2 a P1
+P2 b P2 
