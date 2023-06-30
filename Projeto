@@ -212,35 +212,6 @@ def ler_afd(saida):
     
     return afd
 
-def minimizar_afd(afd,saida2):
-    estado_inicial=[]
-    simbolo_lido = []
-    estado_final = []
-    simbolo_lidoEestado_final= []
-    
-    for i in range(len(afd.transicoes)):
-        ei,sl,ef = afd.transicoes[i].rstrip().split(" ")
-        estado_inicial.append(ei)
-        simbolo_lido.append(sl)
-        estado_final.append(ef)
-
-    aux = ""
-    vetor_aux=[]
-
-    for j in range(len(afd.estados)):
-        for i in range(len(afd.transicoes)):
-            if "P%d"%j in estado_inicial[i]:
-                aux = aux + estado_final[i]
-        vetor_aux.append(aux)
-        aux = ""   
-   
-    print(vetor_aux)            
-
-
-
-
-
-
 #main
 entrada = open("AFND.txt","r")
 temp = open("temp.txt","w")
@@ -259,8 +230,6 @@ saida.close()
 
 saida = open("AFD.txt","r")
 afd=ler_afd(saida)
-
-#minimizar_afd(afd,saida2)
 
 entrada.close()
 temp.close() 
